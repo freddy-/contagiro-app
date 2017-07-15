@@ -22,6 +22,7 @@ export class GaugeScreen {
   			this.calculaRPM(0);  	
   			setTimeout(() => {	
 	  			this.animacaoInicial = false;	
+          this.constructor(NavController);
 	  		}, 1000);
   		}, 1200);
   	}, 250);

@@ -30,6 +30,7 @@ export class GaugeScreen {
   }
 
   calculaRPM(rpm){
+    this.rpm = rpm;
     if(rpm <= 1000){
       this.escala = this.map(rpm, 0.0, 1000.0, 316.0, 325.0);
       this.agulha = this.map(rpm, 0.0, 1000.0, 285.0, 298.0);

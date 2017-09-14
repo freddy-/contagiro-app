@@ -3,16 +3,19 @@ import { ErrorHandler, NgModule } from '@angular/core';
 import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
+import { Insomnia } from '@ionic-native/insomnia';
+import { BluetoothSerial } from '@ionic-native/bluetooth-serial';
+
 
 import { MyApp } from './app.component';
 import { GaugeScreen } from '../pages/gauge/gauge';
 
 @NgModule({
-  declarations: [
+  declarations: [ // put all your components / directives / pipes here
     MyApp,
     GaugeScreen
   ],
-  imports: [
+  imports: [ // put all your modules here
     BrowserModule,
     IonicModule.forRoot(MyApp)
   ],
@@ -21,9 +24,11 @@ import { GaugeScreen } from '../pages/gauge/gauge';
     MyApp,
     GaugeScreen
   ],
-  providers: [
+  providers: [ // put all your services here
     StatusBar,
     SplashScreen,
+    Insomnia,
+    BluetoothSerial,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

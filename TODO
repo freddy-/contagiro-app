@@ -1,0 +1,18 @@
+TODO:
+
+PLUGINS:
+	armazenamento de configs
+	https://ionicframework.com/docs/native/app-preferences/
+	
+
+
+	exibir uma lista com os devices bluetooth num MODAL, por cima do contagiros.
+
+Abre o app, verifica se ta conectado
+se nao estiver, abre tela de config bluetooth
+se estiver
+	verifica se ja foi feita uma conexão anterior
+	se existir tenta conectar neste cara
+	se não existir
+		exibe uma lista com os devices
+		ao selecionar, conecta

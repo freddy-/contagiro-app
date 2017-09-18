@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
-import { Platform } from 'ionic-angular';
+import { Platform, AlertController, Alert, LoadingController, Loading, ToastController, Events } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { Insomnia } from '@ionic-native/insomnia';
 import { BluetoothSerial } from '@ionic-native/bluetooth-serial';
 import { Subscription } from 'rxjs';
-import { AlertController } from 'ionic-angular';
 
 import { GaugeScreen } from '../pages/gauge/gauge';
 
@@ -14,18 +13,26 @@ import { GaugeScreen } from '../pages/gauge/gauge';
 })
 export class MyApp {
   private onResumeSubscription: Subscription;
-  private bluetooth: BluetoothSerial;
+  private loading: Loading;
+  private alert: Alert;
 
   rootPage:any = GaugeScreen;
 
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, insomnia: Insomnia, bt: BluetoothSerial, private alertCtrl: AlertController) {
+  constructor(platform: Platform, 
+    statusBar: StatusBar, 
+    splashScreen: SplashScreen, 
+    insomnia: Insomnia, 
+    private bluetooth: BluetoothSerial, 
+    private alertCtrl: AlertController,
+    private loadCtrl: LoadingController,
+    private toastCtrl: ToastController,
+    private events: Events) {
+    
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       statusBar.styleDefault();
       splashScreen.hide();
-
-      this.bluetooth = bt;
 
       this.onResumeSubscription = platform.resume.subscribe(() => { 
           this.isBluetoothAtivo();
@@ -37,7 +44,7 @@ export class MyApp {
           () => console.log('success'),
           () => console.log('error')
       );
-
+        
       this.isBluetoothAtivo();
     });
   }
@@ -45,9 +52,14 @@ export class MyApp {
   isBluetoothAtivo(){
     this.bluetooth.isEnabled()
     .then(
-        () => this.bluetooth.isConnected().then(
-                              () => console.log("conectado"), //exibir o contagiros
-                              () => this.listarDispositivos()),
+        () => this.bluetooth
+        .isConnected()
+        .then(
+          () => { 
+            this.bluetooth.disconnect(); 
+            this.listarDispositivos();
+          }, //exibir o contagiros
+          () => this.listarDispositivos()),
 
         () => this.bluetooth.showBluetoothSettings()
     );
@@ -64,29 +76,73 @@ export class MyApp {
   }
 
   showModalDispositivos(devices: Array<any>){
-    let alert = this.alertCtrl.create();
-    alert.setTitle("Dispositivos");
+    if (this.alert != null) {
+      this.alert.dismiss();
+    }
+
+    this.alert = this.alertCtrl.create( {enableBackdropDismiss: false} );
+    this.alert.setTitle("Dispositivos");
 
     for(var device of devices){
-      alert.addInput({
+      this.alert.addInput({
         type: 'radio',
         label: device.name,
         value: device.address
       });
     }
 
-    alert.addButton({
+    this.alert.addButton({
       text: 'Ok',
-      handler: (data: any) => {
-        console.log(data);
+      handler: (data: any) => {     
+        if (data === undefined) {
+           return false;
+        }   
+        this.criarModalLoading();
+        this.loading.present();
+        this.conectarDispositivo(data);
       }
     });
 
-    alert.present();
+    this.alert.present();
+  }
+
+  conectarDispositivo(addr: any){
+    this.bluetooth.connect(addr).subscribe(
+      () => { //onNext
+        this.loading.dismiss();
+        this.bluetooth.subscribe(';')
+        .subscribe((data: any) => {
+          this.events.publish('rpm', parseInt(data.replace(';', '')) * 30);
+        });
+      },
+      () => { //onError
+        this.loading.dismiss(); 
+        this.exibirToast('Não foi possível conectar ao dispositivo.');
+        setTimeout(() => {
+          this.listarDispositivos();
+        }, 3000);
+      }, 
+      () => { this.exibirToast('onComplete'); } //onComplete
+      );
   }
 
   ngOnDestroy(){
     this.onResumeSubscription.unsubscribe();
+  }
+
+  criarModalLoading(){
+    this.loading = this.loadCtrl.create({
+      content: 'Conectando...'
+    });
+  }
+
+  exibirToast(texto: string){
+    let toast = this.toastCtrl.create({
+      message: texto,
+      duration: 3000
+    });
+
+    toast.present();
   }
 }
 

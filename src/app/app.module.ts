@@ -5,6 +5,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 import { Insomnia } from '@ionic-native/insomnia';
 import { BluetoothSerial } from '@ionic-native/bluetooth-serial';
+import { AppPreferences } from '@ionic-native/app-preferences';
 
 
 import { MyApp } from './app.component';
@@ -29,6 +30,7 @@ import { GaugeScreen } from '../pages/gauge/gauge';
     SplashScreen,
     Insomnia,
     BluetoothSerial,
+    AppPreferences,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

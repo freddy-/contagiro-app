@@ -4,6 +4,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { Insomnia } from '@ionic-native/insomnia';
 import { BluetoothSerial } from '@ionic-native/bluetooth-serial';
+import { AppPreferences } from '@ionic-native/app-preferences';
 import { Subscription } from 'rxjs';
 
 import { GaugeScreen } from '../pages/gauge/gauge';
@@ -18,7 +19,7 @@ export class MyApp {
 
   rootPage:any = GaugeScreen;
 
-  constructor(platform: Platform, 
+  constructor(private platform: Platform, 
     statusBar: StatusBar, 
     splashScreen: SplashScreen, 
     insomnia: Insomnia, 
@@ -26,18 +27,14 @@ export class MyApp {
     private alertCtrl: AlertController,
     private loadCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private events: Events) {
+    private events: Events,
+    private appPreferences: AppPreferences) {
     
-    platform.ready().then(() => {
+    this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       statusBar.styleDefault();
       splashScreen.hide();
-
-      this.onResumeSubscription = platform.resume.subscribe(() => { 
-          this.isBluetoothAtivo();
-        } 
-      );
 
       insomnia.keepAwake()
         .then(
@@ -51,17 +48,28 @@ export class MyApp {
 
   isBluetoothAtivo(){
     this.bluetooth.isEnabled()
-    .then(
-        () => this.bluetooth
-        .isConnected()
-        .then(
-          () => { 
-            this.bluetooth.disconnect(); 
-            this.listarDispositivos();
-          }, //exibir o contagiros
-          () => this.listarDispositivos()),
-
-        () => this.bluetooth.showBluetoothSettings()
+    .then(() => this.bluetooth.isConnected()
+      .then(() => {
+          //conectado
+          this.bluetooth.disconnect(); 
+          this.listarDispositivos();
+        },
+        () => {
+          //nao conectado
+          this.appPreferences.fetch('device').then(
+            (device) => this.conectarDispositivo(device), 
+            () => { this.listarDispositivos() }
+          );          
+        }
+      ),
+        () => {
+          this.onResumeSubscription = this.platform.resume.subscribe(() => {
+            //quando voltar da tela de config bluetooth, exibe a lista de devices
+            this.onResumeSubscription.unsubscribe();
+            this.isBluetoothAtivo();
+          });
+          this.bluetooth.showBluetoothSettings();
+        }
     );
   }
 
@@ -76,10 +84,6 @@ export class MyApp {
   }
 
   showModalDispositivos(devices: Array<any>){
-    if (this.alert != null) {
-      this.alert.dismiss();
-    }
-
     this.alert = this.alertCtrl.create( {enableBackdropDismiss: false} );
     this.alert.setTitle("Dispositivos");
 
@@ -97,8 +101,6 @@ export class MyApp {
         if (data === undefined) {
            return false;
         }   
-        this.criarModalLoading();
-        this.loading.present();
         this.conectarDispositivo(data);
       }
     });
@@ -107,8 +109,12 @@ export class MyApp {
   }
 
   conectarDispositivo(addr: any){
+    this.criarModalLoading();
+    this.loading.present();
+        
     this.bluetooth.connect(addr).subscribe(
       () => { //onNext
+        this.appPreferences.store('device', addr);
         this.loading.dismiss();
         this.bluetooth.subscribe(';')
         .subscribe((data: any) => {
@@ -117,6 +123,7 @@ export class MyApp {
       },
       () => { //onError
         this.loading.dismiss(); 
+        this.events.publish('rpm', 0);
         this.exibirToast('Não foi possível conectar ao dispositivo.');
         setTimeout(() => {
           this.listarDispositivos();

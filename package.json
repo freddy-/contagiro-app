@@ -20,6 +20,7 @@
         "@angular/http": "4.1.3",
         "@angular/platform-browser": "4.1.3",
         "@angular/platform-browser-dynamic": "4.1.3",
+        "@ionic-native/app-preferences": "^4.2.1",
         "@ionic-native/bluetooth-serial": "^4.2.1",
         "@ionic-native/core": "3.10.2",
         "@ionic-native/insomnia": "^4.2.1",
@@ -28,6 +29,7 @@
         "@ionic/storage": "2.0.1",
         "@types/underscore": "^1.8.3",
         "cordova-android": "^6.2.3",
+        "cordova-plugin-app-preferences": "^0.99.3",
         "cordova-plugin-bluetooth-serial": "^0.4.7",
         "cordova-plugin-console": "1.0.5",
         "cordova-plugin-device": "1.1.4",
@@ -66,7 +68,8 @@
             "cordova-plugin-whitelist": {},
             "ionic-plugin-keyboard": {},
             "cordova-plugin-insomnia": {},
-            "cordova-plugin-bluetooth-serial": {}
+            "cordova-plugin-bluetooth-serial": {},
+            "cordova-plugin-app-preferences": {}
         },
         "platforms": [
             "android"

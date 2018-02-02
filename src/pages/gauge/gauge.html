@@ -1,26 +1,24 @@
-<div class="rpm-container">
+<div class="rpm-container" (dblclick)="habilitaSetShiftLight()" (pan)="setShiftLight($event)">
   <!-- criar estrutura contendo a imagem do RPM de fundo, ponteiro, barra inferior com labels para outras infos -->
-  <img class="tachometer" src="assets/tachometer.jpg" 
+  <img class="tachometer" src="assets/tachometer-v2.jpg"
         [ngClass]="{'slowTransitions': animacaoInicial}"
         [ngStyle]="{'transform': 'rotate(-' + escala + 'deg)'}"/>
 
-  <div class="marcador" 
+  <div class="marcador"
         [ngClass]="{'slowTransitions': animacaoInicial}"
-        [ngStyle]="{'transform': 'rotate(' + agulha + 'deg)'}">    
+        [ngStyle]="{'transform': 'rotate(' + agulha + 'deg)'}">
 
     <div class="sombra-agulha"></div>
     <div class="agulha"></div>
     <div class="centro"></div>
-  </div>   
-
-  <div class="info seven-segment" > <!-- container -->
-  	<div class="info-centro">
-  		<!-- <label >400</label> -->
-      <div class="display">
-        <label class="bg">8888</label> 
-        <label class="valor">{{rpm}}</label>
-      </div>
-  	</div>
   </div>
 
+  <div class="info seven-segment" >
+  	<div class="info-centro">
+      <div class="display">
+        <label class="bg">8888</label>
+        <label class="valor">{{rpm}}</label>
+      </div>
+    </div>
+  </div>
 </div>

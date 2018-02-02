@@ -95,6 +95,7 @@ export class MyApp {
       });
     }
 
+    this.alert.addButton({text: 'Cancelar'});
     this.alert.addButton({
       text: 'Ok',
       handler: (data: any) => {     
@@ -104,6 +105,7 @@ export class MyApp {
         this.conectarDispositivo(data);
       }
     });
+
 
     this.alert.present();
   }
@@ -116,10 +118,9 @@ export class MyApp {
       () => { //onNext
         this.appPreferences.store('device', addr);
         this.loading.dismiss();
-        this.bluetooth.subscribe(';')
-        .subscribe((data: any) => {
-          this.events.publish('rpm', parseInt(data.replace(';', '')) * 30);
-        });
+
+        //enviar evento para o gauge.ts para aplicar o listener
+        this.events.publish('start', {} );
       },
       () => { //onError
         this.loading.dismiss(); 
